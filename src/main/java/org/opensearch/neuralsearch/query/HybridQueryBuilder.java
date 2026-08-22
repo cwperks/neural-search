@@ -114,6 +114,7 @@ public final class HybridQueryBuilder extends AbstractQueryBuilder<HybridQueryBu
      * @param filter the filter parameter
      * @return HybridQueryBuilder itself
      */
+    @Override
     public QueryBuilder filter(QueryBuilder filter) {
         if (validateFilterParams(filter) == false) {
             return this;
@@ -125,6 +126,11 @@ public final class HybridQueryBuilder extends AbstractQueryBuilder<HybridQueryBu
             iterator.set(query.filter(filter));
         }
         return this;
+    }
+
+    @Override
+    public boolean supportsTopLevelFilter() {
+        return true;
     }
 
     /**
