@@ -1301,6 +1301,10 @@ public class HybridQueryBuilderTests extends OpenSearchQueryTestCase {
         assertEquals(new MatchAllQueryBuilder(), updatedNeuralSparseQueryBuilder.filter().get(0));
     }
 
+    public void testSupportsTopLevelFilter() {
+        assertTrue(new HybridQueryBuilder().supportsTopLevelFilter());
+    }
+
     public void testExtractInnerHitsBuilders() {
         NestedQueryBuilder nestedQueryBuilder1 = new NestedQueryBuilder(
             "path1",
