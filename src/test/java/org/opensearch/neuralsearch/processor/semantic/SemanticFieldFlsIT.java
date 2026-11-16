@@ -57,7 +57,12 @@ public class SemanticFieldFlsIT extends BaseNeuralSearchIT {
                     """, companion, companion);
                 assertEquals(1, getHitCount(responseAsMap(request("POST", "/" + index + "/_search", chunkQuery, false))));
 
-                for (String fls : List.of("[\"~title\"]", "[\"~title\",\"~" + companion + "\"]", "[\"public_field\"]")) {
+                for (String fls : List.of(
+                    "[\"~title\"]",
+                    "[\"~title\",\"~" + companion + "\"]",
+                    "[\"public_field\"]",
+                    "[\"~unrelated\"]"
+                )) {
                     request("PUT", "/_plugins/_security/api/roles/" + USER, String.format(Locale.ROOT, """
                         {"index_permissions":[{"index_patterns":["%s"],"allowed_actions":["read"],"fls":%s}]}
                         """, index, fls), false);
@@ -65,7 +70,8 @@ public class SemanticFieldFlsIT extends BaseNeuralSearchIT {
                     request("PUT", "/_plugins/_security/api/rolesmapping/" + USER, "{\"users\":[\"" + USER + "\"]}", false);
                     Map<String, Object> source = (Map<String, Object>) responseAsMap(request("GET", "/" + index + "/_doc/1", null, true))
                         .get("_source");
-                    assertFalse(source.containsKey("title"));
+                    boolean visible = fls.equals("[\"~unrelated\"]");
+                    assertEquals(visible, source.containsKey("title"));
                     assertEquals("visible", source.get("public_field"));
                     Map<String, Object> search = responseAsMap(request("POST", "/" + index + "/_search", chunkQuery, true));
                     assertEquals(0, ((Number) ((Map<?, ?>) search.get("_shards")).get("failed")).intValue());
@@ -80,8 +86,8 @@ public class SemanticFieldFlsIT extends BaseNeuralSearchIT {
                     if (fls.equals("[\"~title\"]")) {
                         if (source.containsKey(companion) || hits != 0) exposed.add(companion);
                     } else {
-                        assertFalse(source.containsKey(companion));
-                        assertEquals(0, hits);
+                        assertEquals(visible, source.containsKey(companion));
+                        assertEquals(visible ? 1 : 0, hits);
                     }
                 }
             }
