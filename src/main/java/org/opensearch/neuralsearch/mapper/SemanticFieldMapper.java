@@ -400,6 +400,11 @@ public class SemanticFieldMapper extends ParametrizedFieldMapper {
             return SemanticFieldMapper.CONTENT_TYPE;
         }
 
+        @Override
+        public Set<String> generatedObjectPaths() {
+            return Set.of(getSemanticInfoFieldPath());
+        }
+
         public String getSemanticInfoFieldPath() {
             final String[] paths = name().split("\\.");
             final String semanticInfoFieldName = semanticParameters.getSemanticInfoFieldName();
